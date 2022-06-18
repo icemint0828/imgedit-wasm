@@ -14,50 +14,68 @@
 <div class="container">
     <div class="header">
         <h1>image edit tools</h1>
-        <p>Image edit tools created from <a href="https://github.com/icemint0828/imgedit">imgedit package</a> with <a href="https://github.com/icemint0828/imgedit-wasm">wasm</a>.</p>
+        <p>Image edit tools created from <a href="https://github.com/icemint0828/imgedit">imgedit package</a> with <a
+                href="https://github.com/icemint0828/imgedit-wasm">wasm</a>.</p>
     </div>
     <div class="row">
         <div class="col-lg-12">
             <div>
                 <ul class="nav tab-group"><!--nav-tabs nav-justified-->
                     <li class="active"><a href="#resize" data-toggle="tab">resize</a></li>
-                    <li><a href="#grayscale" data-toggle="tab">grayscale</a></li>
+                    <li><a href="#trim" data-toggle="tab">trim</a></li>
                     <li><a href="#reverse" data-toggle="tab">reverse</a></li>
+                    <li><a href="#grayscale" data-toggle="tab">grayscale</a></li>
                 </ul>
                 <div class="content">
                     <div class="preview">
-                        <h2>upload image</h2>
+                        <div id="image-status"><h2>empty image</h2></div>
                         <div id="preview"></div>
                         <div id="error-message" style="color: crimson"></div>
                     </div>
                     <div class="operation">
-                        <div class="drop">
+                        <div class="drop" id="drop-zone">
                             <h2>upload area</h2>
                             <p>Drag and drop a file or</p>
-                            <input class="button" type="file" name="file" id="file-input"
-                                   accept=".png, .jpg, .jpeg, .gif" disabled>
+                            <div>
+                                <input class="button" type="file" name="file" id="file-input" accept=".png, .jpg, .jpeg, .gif" disabled>
+                            </div>
+                            <div>
+                                <button class="button" name="reset" id="file-reset" onClick="reset();" disabled>reset</button>
+                            </div>
                         </div>
                         <div class="tab-content">
                             <div class="tab-pane active" id="resize">
-                                <h2> resize </h2>
+                                <h2>resize</h2>
                                 <div>
-                                    <label>width:&nbsp;<input type="number" max="5000" min="0" step="1" id="width"></label>
-                                    &nbsp;&nbsp;
-                                    <label>height:&nbsp;<input type="number" max="5000" min="0" step="1" id="height"></label>
+                                    <label>width:&nbsp;<input type="number" max="5000" min="0" step="1" id="resize-width"></label>
+                                    <label>height:&nbsp;<input type="number" max="5000" min="0" step="1" id="resize-height"></label>
+                                    <label>ratio:&nbsp;<input type="number" max="5000" min="0" step="1" id="resize-ratio"></label>
                                 </div>
-                                <div></div>
+                                <div>
+<!--                                    <label>ratio:&nbsp;<input type="number" max="10" min="0.01" step="0.01" id="resize-ratio"></label>-->
+                                </div>
                                 <button class="button" onClick="resize();" disabled>execute</button>
                             </div>
-                            <div class="tab-pane" id="grayscale">
-                                <div id="drop-zone">
-                                    <h2> grayscale </h2>
-                                    <button class="button" onClick="grayscale();" disabled>
-                                        execute
-                                    </button>
+                            <div class="tab-pane" id="trim">
+                                <h2>trim</h2>
+                                <div>
+                                    <label>left:&nbsp;<input type="number" max="5000" min="0" step="1" id="left"></label>
+                                    <label>top:&nbsp;<input type="number" max="5000" min="0" step="1" id="top"></label>
+                                    <label>width:&nbsp;<input type="number" max="5000" min="0" step="1" id="trim-width"></label>
+                                    <label>height:&nbsp;<input type="number" max="5000" min="0" step="1" id="trim-height"></label>
                                 </div>
+                                <button class="button" onClick="trim();" disabled>execute</button>
                             </div>
                             <div class="tab-pane" id="reverse">
-                                <h2> reverse </h2>
+                                <h2>reverse</h2>
+                                <div>
+                                    <label>vertical:&nbsp;<input type="checkbox" id="vertical" value="1"></label>
+                                </div>
+                                <button class="button" onClick="reverse();" disabled>execute</button>
+                            </div>
+                            <div class="tab-pane" id="grayscale">
+                                <h2>grayscale</h2>
+                                <button class="button" onClick="grayscale();" disabled>execute</button>
                             </div>
                         </div>
                     </div>
@@ -69,6 +87,16 @@
 <script>
     let preview = document.getElementById('preview')
     let errorMessage = document.getElementById("error-message")
+    let imageStatus = document.getElementById("image-status")
+
+    function reset() {
+        let fileInput = document.getElementById('file-input')
+        if (fileInput.files.length > 0) {
+            previewBlob(fileInput.files[0])
+            imageStatus.innerHTML = "<h2>upload image</h2>"
+        }
+        errorMessage.innerHTML = ""
+    }
 
     function previewBlob(blob) {
         /* FileReaderで読み込み、プレビュー画像を表示。 */
@@ -76,11 +104,10 @@
         fr.readAsDataURL(new File([blob], "name", {lastModified: 0}))
         fr.onload = function () {
             let img = document.createElement('img')
-            img.setAttribute('src', fr.result)
+            img.setAttribute('src', String(fr.result))
             img.setAttribute('class', 'image')
             preview.innerHTML = ''
             preview.appendChild(img)
-            errorMessage.innerHTML = 'edit success'
         };
     }
 </script>

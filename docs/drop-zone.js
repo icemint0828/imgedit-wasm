@@ -3,6 +3,7 @@ window.onload = function() {
     let dropZone = document.getElementById('drop-zone')
     let preview = document.getElementById('preview')
     let fileInput = document.getElementById('file-input')
+    let imageStatus = document.getElementById("image-status")
 
     dropZone.addEventListener('dragover', function(e) {
         e.stopPropagation()
@@ -18,6 +19,7 @@ window.onload = function() {
 
     fileInput.addEventListener('change', function () {
         previewFile(this.files[0])
+        imageStatus.innerHTML = "<h2>upload image</h2>"
     })
 
     dropZone.addEventListener('drop', function(e) {
@@ -28,6 +30,7 @@ window.onload = function() {
         if (files.length > 1) return alert('you can only one file to upload ')
         fileInput.files = files //inputのvalueをドラッグしたファイルに置き換える。
         previewFile(files[0])
+        imageStatus.innerHTML = "<h2>upload image</h2>"
     }, false)
 
     function previewFile(file) {
@@ -36,7 +39,7 @@ window.onload = function() {
         fr.readAsDataURL(file)
         fr.onload = function() {
             let img = document.createElement('img')
-            img.setAttribute('src', fr.result)
+            img.setAttribute('src', String(fr.result))
             img.setAttribute('class', 'image')
             preview.innerHTML = ''
             preview.appendChild(img)

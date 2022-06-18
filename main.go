@@ -12,16 +12,15 @@ import (
 	"github.com/icemint0828/imgedit"
 )
 
-// グローバルオブジェクト（Webブラウザはwindow）の取得
 var window = js.Global()
 var document = window.Get("document")
 
 func main() {
 	ch := make(chan interface{})
 	window.Set("resize", js.FuncOf(resize))
+	window.Set("trim", js.FuncOf(trim))
 	window.Set("grayscale", js.FuncOf(grayscale))
-	window.Set("trim", js.FuncOf(grayscale))
-	window.Set("reverse", js.FuncOf(grayscale))
+	window.Set("reverse", js.FuncOf(reverse))
 	<-ch
 }
 
@@ -35,14 +34,38 @@ func grayscale(_ js.Value, _ []js.Value) interface{} {
 	return nil
 }
 
-func resize(_ js.Value, _ []js.Value) interface{} {
+func reverse(_ js.Value, _ []js.Value) interface{} {
 	f := func(srcImg image.Image) image.Image {
 		c := imgedit.NewConverter(srcImg)
 
-		widthVal := getElementById("width").Get("value")
-		heightVal := getElementById("height").Get("value")
+		verticalVal := getElementById("vertical").Get("checked")
 
-		if widthVal.IsNaN() || heightVal.IsNaN() {
+		if verticalVal.Bool() {
+			c.ReverseY()
+		} else {
+			c.ReverseX()
+		}
+		return c.Convert()
+	}
+	fileEdit(f)
+	return nil
+}
+
+func trim(_ js.Value, _ []js.Value) interface{} {
+	f := func(srcImg image.Image) image.Image {
+		c := imgedit.NewConverter(srcImg)
+
+		leftVal := getElementById("left").Get("value")
+		topVal := getElementById("top").Get("value")
+		widthVal := getElementById("trim-width").Get("value")
+		heightVal := getElementById("trim-height").Get("value")
+
+		left, err := strconv.Atoi(leftVal.String())
+		if err != nil {
+			return nil
+		}
+		top, err := strconv.Atoi(topVal.String())
+		if err != nil {
 			return nil
 		}
 		width, err := strconv.Atoi(widthVal.String())
@@ -53,7 +76,45 @@ func resize(_ js.Value, _ []js.Value) interface{} {
 		if err != nil {
 			return nil
 		}
-		c.Resize(width, height)
+		if !((0 <= left && left <= 5000) && (0 <= top && top <= 5000) && (0 <= width && width <= 5000) && (0 <= height && height <= 5000)) {
+			return nil
+		}
+		c.Trim(left, top, width, height)
+
+		return c.Convert()
+	}
+	fileEdit(f)
+	return nil
+}
+
+func resize(_ js.Value, _ []js.Value) interface{} {
+	f := func(srcImg image.Image) image.Image {
+		c := imgedit.NewConverter(srcImg)
+
+		widthVal := getElementById("resize-width").Get("value")
+		heightVal := getElementById("resize-height").Get("value")
+		ratioVal := getElementById("resize-ratio").Get("value")
+
+		ratio, err := strconv.ParseFloat(ratioVal.String(), 64)
+		if err == nil {
+			if !(0.01 <= ratio && ratio <= 10) {
+				return nil
+			}
+			c.ResizeRatio(ratio)
+		} else {
+			width, err := strconv.Atoi(widthVal.String())
+			if err != nil {
+				return nil
+			}
+			height, err := strconv.Atoi(heightVal.String())
+			if err != nil {
+				return nil
+			}
+			if !((0 <= width && width <= 5000) && (0 <= height && height <= 5000)) {
+				return nil
+			}
+			c.Resize(width, height)
+		}
 		return c.Convert()
 	}
 	fileEdit(f)
@@ -61,8 +122,9 @@ func resize(_ js.Value, _ []js.Value) interface{} {
 }
 
 func fileEdit(f func(srcImg image.Image) image.Image) {
-	fileInput := getElementById("file-input")
 	message := getElementById("error-message")
+	status := getElementById("image-status")
+	fileInput := getElementById("file-input")
 	item := fileInput.Get("files").Call("item", 0)
 	if item.IsNull() {
 		message.Set("innerHTML", "file not found")
@@ -75,15 +137,16 @@ func fileEdit(f func(srcImg image.Image) image.Image) {
 		js.CopyBytesToGo(src, srcData)
 		srcImg, fmt, err := image.Decode(bytes.NewBuffer(src))
 		if err != nil {
-			message.Set("innerHTML", " unsupported file")
+			message.Set("innerHTML", "unsupported file")
 			return nil
 		}
 		dstImg := f(srcImg)
 		if dstImg == nil {
-			message.Set("innerHTML", " invalid parameter")
+			message.Set("innerHTML", "invalid parameter")
 			return nil
 		}
 
+		message.Set("innerHTML", "image editing now")
 		dstBuf := &bytes.Buffer{}
 		switch fmt {
 		case "png":
@@ -96,6 +159,8 @@ func fileEdit(f func(srcImg image.Image) image.Image) {
 		var dstData = window.Get("Uint8Array").New(dstBuf.Len())
 		js.CopyBytesToJS(dstData, dstBuf.Bytes())
 		window.Call("previewBlob", dstData.Get("buffer"))
+		message.Set("innerHTML", "edit success")
+		status.Set("innerHTML", "<h2>preview image</h2>")
 		return nil
 	}))
 
