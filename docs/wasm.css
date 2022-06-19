@@ -35,6 +35,7 @@
     border: 1px solid;
     width: 40%;
     height: auto;
+    min-height: 400px;
 }
 
 .preview > #preview {
