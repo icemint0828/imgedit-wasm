@@ -10,6 +10,12 @@
     margin-top: 10px;
 }
 
+.content {
+    justify-content: stretch;
+    display: flex;
+    margin-top: 15px;
+}
+
 .row {
     margin-top: 40px;
     width: 100%;
@@ -45,7 +51,7 @@
 }
 
 .image {
-    max-width:100%;
+    max-width: 100%;
     height: auto;
 }
 
@@ -58,11 +64,6 @@
 
 .button {
     margin: 0 auto;
-}
-
-.content {
-    display: flex;
-    margin-top: 15px;
 }
 
 .tab-content {
