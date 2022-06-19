@@ -22,6 +22,7 @@
 }
 
 .preview {
+    justify-content: stretch;
     border: 2px solid;
     width: 40%;
     min-height: 400px;
@@ -38,6 +39,7 @@
 }
 
 .operation {
+    justify-content: stretch;
     border: 1px solid;
     width: 40%;
     height: auto;
