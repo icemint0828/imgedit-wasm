@@ -14,8 +14,7 @@
 <div class="container">
     <div class="header">
         <h1>image edit tools</h1>
-        <p>Image edit tools created from <a href="https://github.com/icemint0828/imgedit">imgedit package</a> with <a
-                href="https://github.com/icemint0828/imgedit-wasm">wasm</a>.</p>
+        <p>Image edit tools created from <a href="https://github.com/icemint0828/imgedit">imgedit package</a> with <a href="https://github.com/icemint0828/imgedit-wasm">wasm</a>.</p>
     </div>
     <div class="row">
         <div class="col-lg-12">
@@ -30,7 +29,6 @@
                     <div class="preview">
                         <div id="image-status"><h2>empty image</h2></div>
                         <div id="preview"></div>
-                        <div id="error-message" style="color: crimson"></div>
                     </div>
                     <div class="operation">
                         <div class="drop" id="drop-zone">
@@ -39,6 +37,8 @@
                             <div>
                                 <input class="button" type="file" name="file" id="file-input" accept=".png, .jpg, .jpeg, .gif" disabled>
                             </div>
+                            <div id="size-info"></div>
+                            <div id="error-message" style="color: crimson"></div>
                             <div>
                                 <button class="button" name="reset" id="file-reset" onClick="reset();" disabled>reset</button>
                             </div>
@@ -47,8 +47,8 @@
                             <div class="tab-pane active" id="resize">
                                 <h2>resize</h2>
                                 <div>
-                                    <label>width:&nbsp;<input type="number" max="5000" min="0" step="1" id="resize-width"></label>
-                                    <label>height:&nbsp;<input type="number" max="5000" min="0" step="1" id="resize-height"></label>
+                                    <label>width:&nbsp;<input type="number" max="5000" min="0" step="1" id="resize-width">px</label>
+                                    <label>height:&nbsp;<input type="number" max="5000" min="0" step="1" id="resize-height">px</label>
                                 </div>
                                 <div>
                                     <label>ratio:&nbsp;<input type="number" max="10" min="0.01" step="0.01" id="resize-ratio"></label>
@@ -58,10 +58,10 @@
                             <div class="tab-pane" id="trim">
                                 <h2>trim</h2>
                                 <div>
-                                    <label>left:&nbsp;<input type="number" max="5000" min="0" step="1" id="left"></label>
-                                    <label>top:&nbsp;<input type="number" max="5000" min="0" step="1" id="top"></label>
-                                    <label>width:&nbsp;<input type="number" max="5000" min="0" step="1" id="trim-width"></label>
-                                    <label>height:&nbsp;<input type="number" max="5000" min="0" step="1" id="trim-height"></label>
+                                    <label>left:&nbsp;<input type="number" max="5000" min="0" step="1" id="left">px</label>
+                                    <label>top:&nbsp;<input type="number" max="5000" min="0" step="1" id="top">px</label>
+                                    <label>width:&nbsp;<input type="number" max="5000" min="0" step="1" id="trim-width">px</label>
+                                    <label>height:&nbsp;<input type="number" max="5000" min="0" step="1" id="trim-height">px</label>
                                 </div>
                                 <button class="button" onClick="trim();" disabled>execute</button>
                             </div>
@@ -98,16 +98,21 @@
     }
 
     function previewBlob(blob) {
-        /* FileReaderで読み込み、プレビュー画像を表示。 */
         let fr = new FileReader()
         fr.readAsDataURL(new File([blob], "name", {lastModified: 0}))
         fr.onload = function () {
             let img = document.createElement('img')
+            let info = document.getElementById('size-info')
             img.setAttribute('src', String(fr.result))
             img.setAttribute('class', 'image')
+            img.setAttribute('id', 'preview-image')
             preview.innerHTML = ''
             preview.appendChild(img)
-        };
+            preview.appendChild(img).onload = function () {
+                let previewImg = document.getElementById('preview-image')
+                info.innerHTML = previewImg.naturalWidth + "×" + previewImg.naturalHeight
+            }
+        }
     }
 </script>
 </body>
