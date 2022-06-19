@@ -12,6 +12,7 @@
 
 .content {
     justify-content: stretch;
+    align-items: stretch;
     display: flex;
     margin-top: 15px;
 }
@@ -23,6 +24,7 @@
 
 .preview {
     justify-content: stretch;
+    align-items: stretch;
     border: 2px solid;
     width: 40%;
     min-height: 400px;
@@ -40,6 +42,7 @@
 
 .operation {
     justify-content: stretch;
+    align-items: stretch;
     border: 1px solid;
     width: 40%;
     height: auto;
