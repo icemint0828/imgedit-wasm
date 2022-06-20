@@ -10,3 +10,9 @@ It performs image processing such as resizing and trimming.
 
 You can use tools below link.  
 https://icemint0828.github.io/imgedit-wasm/
+
+## Contributing
+This project is currently not very open and is being developed by internal members.  
+We are sorry, but please understand.
+* For issues, we only accept reports of problems.
+* For PR, we do not accept all of them.
