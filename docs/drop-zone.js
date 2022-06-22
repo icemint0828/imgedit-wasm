@@ -9,30 +9,27 @@ window.onload = function () {
     dropZone.addEventListener('dragover', function (e) {
         e.stopPropagation()
         e.preventDefault()
-        this.style.background = '#e1e7f0'
     }, false)
 
     dropZone.addEventListener('dragleave', function (e) {
         e.stopPropagation()
         e.preventDefault()
-        this.style.background = '#ffffff'
     }, false)
 
     fileInput.addEventListener('change', function () {
         previewFile(this.files[0])
-        imageStatus.innerHTML = "<h2>upload image</h2>"
+        imageStatus.innerHTML = "upload image"
         errorMessage.innerHTML = ""
     })
 
     dropZone.addEventListener('drop', function (e) {
         e.stopPropagation()
         e.preventDefault()
-        this.style.background = '#ffffff'
         let files = e.dataTransfer.files // get drop file
         if (files.length > 1) return alert('you can only one file to upload ')
         fileInput.files = files //inputのvalueをドラッグしたファイルに置き換える。
         previewFile(files[0])
-        imageStatus.innerHTML = "<h2>upload image</h2>"
+        imageStatus.innerHTML = "upload image"
         errorMessage.innerHTML = ""
     }, false)
 
@@ -48,7 +45,7 @@ window.onload = function () {
             preview.innerHTML = ""
             preview.appendChild(img).onload = function () {
                 let previewImg = document.getElementById('preview-image')
-                info.innerHTML = previewImg.naturalWidth + "×" + previewImg.naturalHeight
+                info.innerHTML = "("+ previewImg.naturalWidth + "×" + previewImg.naturalHeight + ")"
             }
         }
     }

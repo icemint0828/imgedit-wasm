@@ -161,7 +161,7 @@ func fileEdit(f func(srcImg image.Image) image.Image) {
 			js.CopyBytesToJS(dstData, dstBuf.Bytes())
 			window.Call("previewBlob", dstData.Get("buffer"))
 			message.Set("innerHTML", "edit success")
-			status.Set("innerHTML", "<h2>preview image</h2>")
+			status.Set("innerHTML", "preview image")
 			return nil
 		}))
 	}()
