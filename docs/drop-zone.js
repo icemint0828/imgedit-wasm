@@ -25,7 +25,6 @@ window.onload = function () {
     dropZone.addEventListener('drop', function (e) {
         e.stopPropagation()
         e.preventDefault()
-        // this.style.background = '#ffffff'
         let files = e.dataTransfer.files // get drop file
         if (files.length > 1) return alert('you can only one file to upload ')
         fileInput.files = files //inputのvalueをドラッグしたファイルに置き換える。
