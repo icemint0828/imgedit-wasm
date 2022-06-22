@@ -12,7 +12,6 @@ You can use tools below link.
 https://icemint0828.github.io/imgedit-wasm/
 
 ## Contributing
-This project is currently not very open and is being developed by internal members.  
-We are sorry, but please understand.
-* For issues, we only accept reports of problems.
-* For PR, we do not accept all of them.
+
+This project is currently at early stages and is being developed by internal members.  
+Report your issues through [GitHub issues](https://github.com/icemint0828/imgedit-wasm/issues).
