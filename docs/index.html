@@ -2,84 +2,67 @@
 <head>
     <meta charset="UTF-8">
     <title>imgedit</title>
-    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+<!--    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">-->
     <link rel="stylesheet" type="text/css" href="wasm.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+<!--    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>-->
     <script src="wasm_exec.js"></script>
     <script src="drop-zone.js"></script>
     <script src="wasm.js"></script>
 </head>
 <body>
-<div class="container">
-    <div class="header">
+<div class="wrapper">
+    <header class="common-width">
         <h1>image edit tools</h1>
         <p>Image edit tools created from <a href="https://github.com/icemint0828/imgedit">imgedit package</a> with <a href="https://github.com/icemint0828/imgedit-wasm">wasm</a>.</p>
-    </div>
-    <div class="row">
-        <div class="col-lg-12">
-            <div>
-                <ul class="nav tab-group"><!--nav-tabs nav-justified-->
-                    <li class="active"><a href="#resize" data-toggle="tab">resize</a></li>
-                    <li><a href="#trim" data-toggle="tab">trim</a></li>
-                    <li><a href="#reverse" data-toggle="tab">reverse</a></li>
-                    <li><a href="#grayscale" data-toggle="tab">grayscale</a></li>
-                </ul>
-                <div class="content">
-                    <div class="preview">
-                        <div id="image-status"><h2>empty image</h2></div>
-                        <div id="preview"></div>
-                    </div>
-                    <div class="operation">
-                        <div class="drop" id="drop-zone">
-                            <h2>upload area</h2>
-                            <p>Drag and drop a file or</p>
-                            <div>
-                                <input class="button" type="file" name="file" id="file-input" accept=".png, .jpg, .jpeg, .gif" disabled>
-                            </div>
-                            <div id="size-info"></div>
-                            <div id="error-message" style="color: crimson"></div>
-                            <div>
-                                <button class="button" name="reset" id="file-reset" onClick="reset();" disabled>reset</button>
-                            </div>
-                        </div>
-                        <div class="tab-content">
-                            <div class="tab-pane active" id="resize">
-                                <h2>resize</h2>
-                                <div>
-                                    <label>width:&nbsp;<input type="number" max="5000" min="0" step="1" id="resize-width">px</label>
-                                    <label>height:&nbsp;<input type="number" max="5000" min="0" step="1" id="resize-height">px</label>
-                                </div>
-                                <div>
-                                    <label>ratio:&nbsp;<input type="number" max="10" min="0.01" step="0.01" id="resize-ratio"></label>
-                                </div>
-                                <button class="button" onClick="resize();" disabled>execute</button>
-                            </div>
-                            <div class="tab-pane" id="trim">
-                                <h2>trim</h2>
-                                <div>
-                                    <label>left:&nbsp;<input type="number" max="5000" min="0" step="1" id="left">px</label>
-                                    <label>top:&nbsp;<input type="number" max="5000" min="0" step="1" id="top">px</label>
-                                    <label>width:&nbsp;<input type="number" max="5000" min="0" step="1" id="trim-width">px</label>
-                                    <label>height:&nbsp;<input type="number" max="5000" min="0" step="1" id="trim-height">px</label>
-                                </div>
-                                <button class="button" onClick="trim();" disabled>execute</button>
-                            </div>
-                            <div class="tab-pane" id="reverse">
-                                <h2>reverse</h2>
-                                <div>
-                                    <label>vertical:&nbsp;<input type="checkbox" id="vertical" value="1"></label>
-                                </div>
-                                <button class="button" onClick="reverse();" disabled>execute</button>
-                            </div>
-                            <div class="tab-pane" id="grayscale">
-                                <h2>grayscale</h2>
-                                <button class="button" onClick="grayscale();" disabled>execute</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    </header>
+
+    <div class="tab common-width">
+        <ul class="tab-menu">
+            <li class="active"><a href="#resize" data-toggle="tab">resize</a></li>
+            <li><a href="#trim" data-toggle="tab">trim</a></li>
+            <li><a href="#reverse" data-toggle="tab">reverse</a></li>
+            <li><a href="#grayscale" data-toggle="tab">grayscale</a></li>
+            <li><a href="#reset" data-toggle="tab">reset</a></li>
+        </ul>
+        <div class="tab-contents">
+            <div class="tab-content active" id="resize">
+                <label>width:<input type="number" max="5000" min="0" step="1" id="resize-width">px</label>
+                <label>height:<input type="number" max="5000" min="0" step="1" id="resize-height">px</label>
+                <label>ratio:<input type="number" max="10" min="0.01" step="0.01" id="resize-ratio"></label>
+                <button class="button" onClick="resize();" disabled>execute</button>
             </div>
+            <div class="tab-content" id="trim">
+                <label>left:<input type="number" max="5000" min="0" step="1" id="left">px</label>
+                <label>top:<input type="number" max="5000" min="0" step="1" id="top">px</label>
+                <label>width:<input type="number" max="5000" min="0" step="1" id="trim-width">px</label>
+                <label>height:<input type="number" max="5000" min="0" step="1" id="trim-height">px</label>
+                <button class="button" onClick="trim();" disabled>execute</button>
+            </div>
+            <div class="tab-content" id="reverse">
+                <label>vertical:<input type="checkbox" id="vertical" value="1"></label>
+                <button class="button" onClick="reverse();" disabled>execute</button>
+            </div>
+            <div class="tab-content" id="grayscale">
+                <button class="button" onClick="grayscale();" disabled>execute</button>
+            </div>
+            <div class="tab-content" id="reset">
+                <button class="button" name="reset" id="file-reset" onClick="reset();" disabled>execute</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="preview-area">
+        <div class="status-bar">
+            <span id="error-message" class="error"></span>
+            <span id="image-status"></span>
+            <span id="size-info"></span>
+        </div>
+        <div id="preview"></div>
+    </div>
+    <div class="upload-area common-width">
+        <div class="drop" id="drop-zone">
+            <p>Drag and drop a file or <input class="button" type="file" name="file" id="file-input" accept=".png, .jpg, .jpeg, .gif" disabled></p>
         </div>
     </div>
 </div>
@@ -92,7 +75,7 @@
         let fileInput = document.getElementById('file-input')
         if (fileInput.files.length > 0) {
             previewBlob(fileInput.files[0])
-            imageStatus.innerHTML = "<h2>upload image</h2>"
+            imageStatus.innerHTML = "upload image"
         }
         errorMessage.innerHTML = ""
     }
@@ -110,9 +93,36 @@
             preview.appendChild(img)
             preview.appendChild(img).onload = function () {
                 let previewImg = document.getElementById('preview-image')
-                info.innerHTML = previewImg.naturalWidth + "×" + previewImg.naturalHeight
+                info.innerHTML = "(" + previewImg.naturalWidth + "×" + previewImg.naturalHeight + ")"
             }
         }
+    }
+
+    tabChange(getTabId(document.querySelector('.tab-menu li.active a').href));
+
+    let tabs = document.querySelectorAll('.tab-menu li a');
+    tabs.forEach(function (aElement) {
+        aElement.addEventListener('click', function () {
+            tabChange(getTabId(aElement.href));
+            return false;
+        })
+    })
+
+    function getTabId(activeHref) {
+        return activeHref.substring(activeHref.indexOf('#'));
+    }
+
+    function tabChange(activeId) {
+        document.querySelector('.tab-menu li.active').classList.remove('active');
+        document.querySelector('.tab-menu li a[href=\'' + activeId +'\']').parentElement.classList.add('active');
+
+        document.querySelector('.tab-contents .tab-content' + activeId).classList.add('show');
+        document.querySelector('.tab-contents .tab-content' + activeId).classList.remove('hide');
+        let hideElements = document.querySelectorAll('.tab-contents .tab-content:not(' + activeId + ')');
+        hideElements.forEach(function (hideElement) {
+            hideElement.classList.add('hide');
+            hideElement.classList.remove('show');
+        })
     }
 </script>
 </body>
