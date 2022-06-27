@@ -17,13 +17,6 @@ body {
     color: #5f414b;
 }
 
-@media (prefers-color-scheme: dark) {
-    body {
-        background-color: #524e4d;
-        color: floralwhite;
-    }
-}
-
 .show { display: block; }
 .hide { display: none; }
 
@@ -119,14 +112,11 @@ header > p {
     display: block;
     vertical-align: middle;
     text-decoration: none;
-}
-
-.tab-menu > li > a {
     color: steelblue;
 }
 
 .tab-menu > li.active > a {
-    color: white;
+    color: floralwhite;
 }
 
 /* Tab Contents */
@@ -138,12 +128,12 @@ header > p {
     align-items: center;
     border: 1px solid ;
     border-color: steelblue steelblue #5f414b steelblue;
+    color: #5f414b;
     background-color: white;
 }
 
 .tab-content {
     padding: 15px 15px;
-    color: #5f414b;
 }
 
 .tab-content.hide {
@@ -337,4 +327,27 @@ header > p {
 #file-input {
     position: relative;
     z-index: 2;
+}
+
+/* DarkMode */
+@media (prefers-color-scheme: dark) {
+    body {
+        color: floralwhite;
+        background-color: #524e4d;
+    }
+
+    .tab-menu > li {
+        border-color: #595857;
+        background-color: #433d3c;
+    }
+
+    .tab-menu > li > a { color: floralwhite; }
+
+    .tab-contents {
+        border-color: #595857 #302833 #302833 #302833;
+        color: floralwhite;
+        background-color: #433d3c;
+    }
+    .preview-area { border-color: #302833; }
+    .upload-area { border-color: #302833; }
 }
