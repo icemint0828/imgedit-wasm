@@ -5,6 +5,7 @@ window.onload = function () {
     let fileInput = document.getElementById('file-input')
     let imageStatus = document.getElementById("image-status")
     let errorMessage = document.getElementById("error-message")
+    let info = document.getElementById('size-info')
 
     dropZone.addEventListener('dragover', function (e) {
         e.stopPropagation()
@@ -17,9 +18,18 @@ window.onload = function () {
     }, false)
 
     fileInput.addEventListener('change', function () {
-        previewFile(this.files[0])
-        imageStatus.innerHTML = "upload image"
+        if (this.files.length === 1) {
+            previewFile(this.files[0])
+            imageStatus.innerHTML = "upload image"
+            errorMessage.innerHTML = ""
+            preview.setAttribute('data-state', statusUpload)
+            return
+        }
+        preview.innerHTML = ""
+        imageStatus.innerHTML = ""
         errorMessage.innerHTML = ""
+        info.innerHTML = ""
+        preview.setAttribute('data-state', statusNone)
     })
 
     dropZone.addEventListener('drop', function (e) {
@@ -31,6 +41,7 @@ window.onload = function () {
         previewFile(files[0])
         imageStatus.innerHTML = "upload image"
         errorMessage.innerHTML = ""
+        preview.setAttribute('data-state', statusUpload)
     }, false)
 
     function previewFile(file) {
@@ -38,7 +49,6 @@ window.onload = function () {
         fr.readAsDataURL(file)
         fr.onload = function () {
             let img = document.createElement('img')
-            let info = document.getElementById('size-info')
             img.setAttribute('src', String(fr.result))
             img.setAttribute('class', 'image')
             img.setAttribute('id', 'preview-image')
