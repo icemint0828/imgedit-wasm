@@ -52,7 +52,7 @@
             <span id="size-info"></span>
         </div>
         <div class="reset"><button class="button" name="reset" id="file-reset" onClick="reset();"></button></div>
-        <div id="preview"></div>
+        <div id="preview" data-state="onNone"></div>
     </div>
     <div class="upload-area common-width">
         <p>Drag and drop a file or <input class="button" type="file" name="file" id="file-input" accept=".png, .jpg, .jpeg, .gif"></p>
@@ -63,14 +63,26 @@
     let preview = document.getElementById('preview')
     let errorMessage = document.getElementById("error-message")
     let imageStatus = document.getElementById("image-status")
+    // let statusNone = "onNone"
+    let statusUpload = "onUpload"
+    let statusPreview = "onPreview"
 
     function reset() {
         let fileInput = document.getElementById('file-input')
-        if (fileInput.files.length > 0) {
+        if (fileInput.files.length > 0 && preview.getAttribute('data-state') === statusPreview) {
             previewBlob(fileInput.files[0])
             imageStatus.innerHTML = "upload image"
+            preview.setAttribute('data-state', statusUpload)
         }
         errorMessage.innerHTML = ""
+        document.querySelectorAll('.tab-contents *>input[type="number"]').forEach(function (element) {
+                element.value = null
+            }
+        )
+        document.querySelectorAll('.tab-contents *>input[type="checkbox"]').forEach(function (element) {
+                element.checked = false
+            }
+        )
     }
 
     function previewBlob(blob) {
@@ -91,14 +103,17 @@
         }
     }
 
-    let tabId = location.hash === ''? getTabId(document.querySelector('.tab-menu li:first-child a').href): location.hash;
-    tabChange(tabId);
+    if (location.hash === '') {
+        location = document.querySelector('.tab-menu li:first-child a').href
+    }
+    tabChange(location.hash);
 
     let tabs = document.querySelectorAll('.tab-menu li a');
     tabs.forEach(function (aElement) {
         aElement.addEventListener('click', function () {
-            tabChange(getTabId(aElement.href));
-            return false;
+            if (getTabId(aElement.href) !== location.hash) {
+                tabChange(getTabId(aElement.href));
+            }
         })
     })
 
@@ -108,7 +123,7 @@
 
     function tabChange(activeId) {
         document.querySelector('.tab-menu li.active').classList.remove('active');
-        document.querySelector('.tab-menu li a[href=\'' + activeId +'\']').parentElement.classList.add('active');
+        document.querySelector('.tab-menu li a[href=\'' + activeId + '\']').parentElement.classList.add('active');
 
         document.querySelector('.tab-contents .tab-content' + activeId).classList.add('show');
         document.querySelector('.tab-contents .tab-content' + activeId).classList.remove('hide');
@@ -117,6 +132,7 @@
             hideElement.classList.add('hide');
             hideElement.classList.remove('show');
         })
+        reset()
     }
 </script>
 </body>

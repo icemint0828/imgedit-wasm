@@ -124,6 +124,7 @@ func fileEdit(f func(srcImg image.Image) image.Image) {
 	go func() {
 		status := getElementById("image-status")
 		fileInput := getElementById("file-input")
+		preview := getElementById("preview")
 		item := fileInput.Get("files").Call("item", 0)
 		if item.IsNull() {
 			time.Sleep(1 * time.Second)
@@ -162,6 +163,7 @@ func fileEdit(f func(srcImg image.Image) image.Image) {
 			window.Call("previewBlob", dstData.Get("buffer"))
 			message.Set("innerHTML", "edit success")
 			status.Set("innerHTML", "preview image")
+			preview.Call("setAttribute", "data-state", "onPreview")
 			return nil
 		}))
 	}()
