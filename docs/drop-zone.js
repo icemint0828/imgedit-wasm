@@ -30,6 +30,7 @@ window.onload = function () {
         errorMessage.innerHTML = ""
         info.innerHTML = ""
         preview.setAttribute('data-state', statusNone)
+        delete preview.dataset.originFormat
     })
 
     dropZone.addEventListener('drop', function (e) {
@@ -52,6 +53,7 @@ window.onload = function () {
             img.setAttribute('src', String(fr.result))
             img.setAttribute('class', 'image')
             img.setAttribute('id', 'preview-image')
+            preview.dataset.originFormat = String(fr.result.slice(fr.result.indexOf("/") + 1, fr.result.indexOf(";")))
             preview.innerHTML = ""
             preview.appendChild(img).onload = function () {
                 let previewImg = document.getElementById('preview-image')

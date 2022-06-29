@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"strconv"
 	"syscall/js"
 	"time"
@@ -19,9 +20,26 @@ func main() {
 	ch := make(chan interface{})
 	window.Set("resize", js.FuncOf(resize))
 	window.Set("trim", js.FuncOf(trim))
-	window.Set("grayscale", js.FuncOf(grayscale))
 	window.Set("reverse", js.FuncOf(reverse))
+	window.Set("grayscale", js.FuncOf(grayscale))
+	window.Set("extension", js.FuncOf(extension))
 	<-ch
+}
+
+func extension(_ js.Value, _ []js.Value) interface{} {
+	elements := getElementsByName("extension")
+	var extension imgedit.Extension
+	for i := 0; i < elements.Length(); i++ {
+		element := elements.Index(i)
+		checked := element.Get("checked")
+		if checked.Bool() {
+			extension = imgedit.Extension(element.Get("value").String())
+			break
+		}
+	}
+	fmt.Println(extension)
+	fileConvert(extension)
+	return nil
 }
 
 func grayscale(_ js.Value, _ []js.Value) interface{} {
@@ -146,10 +164,51 @@ func fileEdit(f func(bc imgedit.ByteConverter) error) {
 
 			dstBuf := &bytes.Buffer{}
 			_ = bc.WriteAs(dstBuf, format)
+			fmt.Println(format)
 
 			var dstData = window.Get("Uint8Array").New(dstBuf.Len())
 			js.CopyBytesToJS(dstData, dstBuf.Bytes())
-			window.Call("previewBlob", dstData.Get("buffer"))
+			window.Call("previewBlob", dstData.Get("buffer"), string(format))
+			message.Set("innerHTML", "edit success")
+			status.Set("innerHTML", "preview image")
+			preview.Call("setAttribute", "data-state", "onPreview")
+			return nil
+		}))
+	}()
+	return
+}
+
+func fileConvert(dstFormat imgedit.Extension) {
+	message := getElementById("error-message")
+	message.Set("innerHTML", "image editing now")
+	go func() {
+		status := getElementById("image-status")
+		fileInput := getElementById("file-input")
+		preview := getElementById("preview")
+		item := fileInput.Get("files").Call("item", 0)
+		if item.IsNull() {
+			time.Sleep(1 * time.Second)
+			message.Set("innerHTML", "file not found")
+			return
+		}
+
+		item.Call("arrayBuffer").Call("then", js.FuncOf(func(v js.Value, x []js.Value) any {
+			srcData := window.Get("Uint8Array").New(x[0])
+			src := make([]byte, srcData.Get("length").Int())
+			js.CopyBytesToGo(src, srcData)
+			bc, _, err := imgedit.NewByteConverter(bytes.NewBuffer(src))
+			if err != nil {
+				time.Sleep(1 * time.Second)
+				message.Set("innerHTML", "unsupported file")
+				return nil
+			}
+
+			dstBuf := &bytes.Buffer{}
+			_ = bc.WriteAs(dstBuf, dstFormat)
+
+			var dstData = window.Get("Uint8Array").New(dstBuf.Len())
+			js.CopyBytesToJS(dstData, dstBuf.Bytes())
+			window.Call("previewBlob", dstData.Get("buffer"), string(dstFormat))
 			message.Set("innerHTML", "edit success")
 			status.Set("innerHTML", "preview image")
 			preview.Call("setAttribute", "data-state", "onPreview")
@@ -161,4 +220,8 @@ func fileEdit(f func(bc imgedit.ByteConverter) error) {
 
 func getElementById(id string) js.Value {
 	return document.Call("getElementById", id)
+}
+
+func getElementsByName(name string) js.Value {
+	return document.Call("getElementsByName", name)
 }
