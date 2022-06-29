@@ -2,10 +2,7 @@ package main
 
 import (
 	"bytes"
-	"image"
-	"image/gif"
-	"image/jpeg"
-	"image/png"
+	"errors"
 	"strconv"
 	"syscall/js"
 	"time"
@@ -15,6 +12,8 @@ import (
 
 var window = js.Global()
 var document = window.Get("document")
+
+var ErrInvalidParam = errors.New("invalid parameter")
 
 func main() {
 	ch := make(chan interface{})
@@ -26,33 +25,31 @@ func main() {
 }
 
 func grayscale(_ js.Value, _ []js.Value) interface{} {
-	f := func(srcImg image.Image) image.Image {
-		c := imgedit.NewConverter(srcImg)
-		c.Grayscale()
-		return c.Convert()
+	f := func(bc imgedit.ByteConverter) error {
+		bc.Grayscale()
+		return nil
 	}
 	fileEdit(f)
 	return nil
 }
 
 func reverse(_ js.Value, _ []js.Value) interface{} {
-	f := func(srcImg image.Image) image.Image {
+	f := func(bc imgedit.ByteConverter) error {
 		verticalVal := getElementById("vertical").Get("checked")
 
-		c := imgedit.NewConverter(srcImg)
 		if verticalVal.Bool() {
-			c.ReverseY()
+			bc.ReverseY()
 		} else {
-			c.ReverseX()
+			bc.ReverseX()
 		}
-		return c.Convert()
+		return nil
 	}
 	fileEdit(f)
 	return nil
 }
 
 func trim(_ js.Value, _ []js.Value) interface{} {
-	f := func(srcImg image.Image) image.Image {
+	f := func(bc imgedit.ByteConverter) error {
 		leftVal := getElementById("left").Get("value")
 		topVal := getElementById("top").Get("value")
 		widthVal := getElementById("trim-width").Get("value")
@@ -60,44 +57,42 @@ func trim(_ js.Value, _ []js.Value) interface{} {
 
 		left, err := strconv.Atoi(leftVal.String())
 		if err != nil {
-			return nil
+			return ErrInvalidParam
 		}
 		top, err := strconv.Atoi(topVal.String())
 		if err != nil {
-			return nil
+			return ErrInvalidParam
 		}
 		width, err := strconv.Atoi(widthVal.String())
 		if err != nil {
-			return nil
+			return ErrInvalidParam
 		}
 		height, err := strconv.Atoi(heightVal.String())
 		if err != nil {
-			return nil
+			return ErrInvalidParam
 		}
 		if !((0 <= left && left <= 5000) && (0 <= top && top <= 5000) && (0 <= width && width <= 5000) && (0 <= height && height <= 5000)) {
 			return nil
 		}
-		c := imgedit.NewConverter(srcImg)
-		c.Trim(left, top, width, height)
-		return c.Convert()
+		bc.Trim(left, top, width, height)
+		return nil
 	}
 	fileEdit(f)
 	return nil
 }
 
 func resize(_ js.Value, _ []js.Value) interface{} {
-	f := func(srcImg image.Image) image.Image {
+	f := func(bc imgedit.ByteConverter) error {
 		widthVal := getElementById("resize-width").Get("value")
 		heightVal := getElementById("resize-height").Get("value")
 		ratioVal := getElementById("resize-ratio").Get("value")
 
 		ratio, err := strconv.ParseFloat(ratioVal.String(), 64)
-		c := imgedit.NewConverter(srcImg)
 		if err == nil {
 			if !(0.01 <= ratio && ratio <= 10) {
 				return nil
 			}
-			c.ResizeRatio(ratio)
+			bc.ResizeRatio(ratio)
 		} else {
 			width, err := strconv.Atoi(widthVal.String())
 			if err != nil {
@@ -110,15 +105,15 @@ func resize(_ js.Value, _ []js.Value) interface{} {
 			if !((0 <= width && width <= 5000) && (0 <= height && height <= 5000)) {
 				return nil
 			}
-			c.Resize(width, height)
+			bc.Resize(width, height)
 		}
-		return c.Convert()
+		return nil
 	}
 	fileEdit(f)
 	return nil
 }
 
-func fileEdit(f func(srcImg image.Image) image.Image) {
+func fileEdit(f func(bc imgedit.ByteConverter) error) {
 	message := getElementById("error-message")
 	message.Set("innerHTML", "image editing now")
 	go func() {
@@ -136,28 +131,22 @@ func fileEdit(f func(srcImg image.Image) image.Image) {
 			srcData := window.Get("Uint8Array").New(x[0])
 			src := make([]byte, srcData.Get("length").Int())
 			js.CopyBytesToGo(src, srcData)
-			srcImg, format, err := image.Decode(bytes.NewBuffer(src))
+			bc, format, err := imgedit.NewByteConverter(bytes.NewBuffer(src))
 			if err != nil {
 				time.Sleep(1 * time.Second)
 				message.Set("innerHTML", "unsupported file")
 				return nil
 			}
-			dstImg := f(srcImg)
-			if dstImg == nil {
+			err = f(bc)
+			if err != nil {
 				time.Sleep(1 * time.Second)
-				message.Set("innerHTML", "invalid parameter")
+				message.Set("innerHTML", err.Error())
 				return nil
 			}
 
 			dstBuf := &bytes.Buffer{}
-			switch format {
-			case "png":
-				png.Encode(dstBuf, dstImg)
-			case "jpeg":
-				jpeg.Encode(dstBuf, dstImg, &jpeg.Options{Quality: 100})
-			case "gif":
-				gif.Encode(dstBuf, dstImg, &gif.Options{NumColors: 256})
-			}
+			_ = bc.WriteAs(dstBuf, format)
+
 			var dstData = window.Get("Uint8Array").New(dstBuf.Len())
 			js.CopyBytesToJS(dstData, dstBuf.Bytes())
 			window.Call("previewBlob", dstData.Get("buffer"))
