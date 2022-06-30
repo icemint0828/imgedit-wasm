@@ -37,7 +37,6 @@ func extension(_ js.Value, _ []js.Value) interface{} {
 			break
 		}
 	}
-	fmt.Println(extension)
 	fileConvert(extension)
 	return nil
 }
