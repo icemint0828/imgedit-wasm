@@ -163,7 +163,6 @@ func fileEdit(f func(bc imgedit.ByteConverter) error) {
 
 			dstBuf := &bytes.Buffer{}
 			_ = bc.WriteAs(dstBuf, format)
-			fmt.Println(format)
 
 			var dstData = window.Get("Uint8Array").New(dstBuf.Len())
 			js.CopyBytesToJS(dstData, dstBuf.Bytes())
