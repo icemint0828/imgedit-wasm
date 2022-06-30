@@ -350,8 +350,9 @@ header > p {
     background-color: #71686c;
 }
 
-.upload-area > button {
-    z-index: 10;
+#file-input {
+    position: relative;
+    z-index: 2;
 }
 
 .drop {
@@ -363,11 +364,6 @@ header > p {
     right: 0;
     left: 0;
     z-index: 1;
-}
-
-#file-input {
-    position: relative;
-    z-index: 2;
 }
 
 /* DarkMode */
