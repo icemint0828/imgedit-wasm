@@ -19,9 +19,25 @@ func main() {
 	ch := make(chan interface{})
 	window.Set("resize", js.FuncOf(resize))
 	window.Set("trim", js.FuncOf(trim))
-	window.Set("grayscale", js.FuncOf(grayscale))
 	window.Set("reverse", js.FuncOf(reverse))
+	window.Set("grayscale", js.FuncOf(grayscale))
+	window.Set("extension", js.FuncOf(extension))
 	<-ch
+}
+
+func extension(_ js.Value, _ []js.Value) interface{} {
+	elements := getElementsByName("extension")
+	var extension imgedit.Extension
+	for i := 0; i < elements.Length(); i++ {
+		element := elements.Index(i)
+		checked := element.Get("checked")
+		if checked.Bool() {
+			extension = imgedit.Extension(element.Get("value").String())
+			break
+		}
+	}
+	fileEdit(nil, extension)
+	return nil
 }
 
 func grayscale(_ js.Value, _ []js.Value) interface{} {
@@ -29,7 +45,7 @@ func grayscale(_ js.Value, _ []js.Value) interface{} {
 		bc.Grayscale()
 		return nil
 	}
-	fileEdit(f)
+	fileEdit(f, "")
 	return nil
 }
 
@@ -44,7 +60,7 @@ func reverse(_ js.Value, _ []js.Value) interface{} {
 		}
 		return nil
 	}
-	fileEdit(f)
+	fileEdit(f, "")
 	return nil
 }
 
@@ -77,7 +93,7 @@ func trim(_ js.Value, _ []js.Value) interface{} {
 		bc.Trim(left, top, width, height)
 		return nil
 	}
-	fileEdit(f)
+	fileEdit(f, "")
 	return nil
 }
 
@@ -109,11 +125,11 @@ func resize(_ js.Value, _ []js.Value) interface{} {
 		}
 		return nil
 	}
-	fileEdit(f)
+	fileEdit(f, "")
 	return nil
 }
 
-func fileEdit(f func(bc imgedit.ByteConverter) error) {
+func fileEdit(f func(bc imgedit.ByteConverter) error, dstFormat imgedit.Extension) {
 	message := getElementById("error-message")
 	message.Set("innerHTML", "image editing now")
 	go func() {
@@ -137,11 +153,17 @@ func fileEdit(f func(bc imgedit.ByteConverter) error) {
 				message.Set("innerHTML", "unsupported file")
 				return nil
 			}
-			err = f(bc)
-			if err != nil {
-				time.Sleep(1 * time.Second)
-				message.Set("innerHTML", err.Error())
-				return nil
+			if f != nil {
+				err = f(bc)
+				if err != nil {
+					time.Sleep(1 * time.Second)
+					message.Set("innerHTML", err.Error())
+					return nil
+				}
+			}
+
+			if dstFormat != "" {
+				format = dstFormat
 			}
 
 			dstBuf := &bytes.Buffer{}
@@ -149,7 +171,7 @@ func fileEdit(f func(bc imgedit.ByteConverter) error) {
 
 			var dstData = window.Get("Uint8Array").New(dstBuf.Len())
 			js.CopyBytesToJS(dstData, dstBuf.Bytes())
-			window.Call("previewBlob", dstData.Get("buffer"))
+			window.Call("previewBlob", dstData.Get("buffer"), string(format))
 			message.Set("innerHTML", "edit success")
 			status.Set("innerHTML", "preview image")
 			preview.Call("setAttribute", "data-state", "onPreview")
@@ -161,4 +183,8 @@ func fileEdit(f func(bc imgedit.ByteConverter) error) {
 
 func getElementById(id string) js.Value {
 	return document.Call("getElementById", id)
+}
+
+func getElementsByName(name string) js.Value {
+	return document.Call("getElementsByName", name)
 }

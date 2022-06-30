@@ -22,14 +22,15 @@ window.onload = function () {
             previewFile(this.files[0])
             imageStatus.innerHTML = "upload image"
             errorMessage.innerHTML = ""
-            preview.setAttribute('data-state', statusUpload)
+            preview.dataset.state = statusUpload
             return
         }
         preview.innerHTML = ""
         imageStatus.innerHTML = ""
         errorMessage.innerHTML = ""
         info.innerHTML = ""
-        preview.setAttribute('data-state', statusNone)
+        preview.dataset.state = statusNone
+        delete preview.dataset.originFormat
     })
 
     dropZone.addEventListener('drop', function (e) {
@@ -41,7 +42,7 @@ window.onload = function () {
         previewFile(files[0])
         imageStatus.innerHTML = "upload image"
         errorMessage.innerHTML = ""
-        preview.setAttribute('data-state', statusUpload)
+        preview.dataset.state = statusUpload
     }, false)
 
     function previewFile(file) {
@@ -52,6 +53,7 @@ window.onload = function () {
             img.setAttribute('src', String(fr.result))
             img.setAttribute('class', 'image')
             img.setAttribute('id', 'preview-image')
+            preview.dataset.originFormat = String(fr.result.slice(fr.result.indexOf("/") + 1, fr.result.indexOf(";")))
             preview.innerHTML = ""
             preview.appendChild(img).onload = function () {
                 let previewImg = document.getElementById('preview-image')

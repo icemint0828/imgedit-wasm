@@ -20,6 +20,7 @@
             <li><a href="#trim" data-toggle="tab">trim</a></li>
             <li><a href="#reverse" data-toggle="tab">reverse</a></li>
             <li><a href="#grayscale" data-toggle="tab">grayscale</a></li>
+            <li><a href="#extension" data-toggle="tab">extension</a></li>
         </ul>
         <div class="tab-contents">
             <div class="tab-content" id="resize">
@@ -42,6 +43,12 @@
             <div class="tab-content" id="grayscale">
                 <button class="button" onClick="grayscale();">execute</button>
             </div>
+            <div class="tab-content" id="extension">
+                <input type="radio" name="extension" id="png" value="png" checked><label class="radio" for="png">png:</label>
+                <input type="radio" name="extension" id="jpeg" value="jpeg"><label class="radio" for="jpeg">jpeg:</label>
+                <input type="radio" name="extension" id="gif" value="gif"><label class="radio" for="gif">gif:</label>
+                <button class="button" onClick="extension();">execute</button>
+            </div>
         </div>
     </div>
 
@@ -51,7 +58,10 @@
             <span id="image-status"></span>
             <span id="size-info"></span>
         </div>
-        <div class="reset"><button class="button" name="reset" id="file-reset" onClick="reset();"></button></div>
+        <div class="button-area">
+            <a id="file-reset" class="hide" onclick="reset()"></a>
+            <a id="download" class="hide" href="" download></a>
+        </div>
         <div id="preview" data-state="onNone"></div>
     </div>
     <div class="upload-area common-width">
@@ -69,10 +79,10 @@
 
     function reset() {
         let fileInput = document.getElementById('file-input')
-        if (fileInput.files.length > 0 && preview.getAttribute('data-state') === statusPreview) {
-            previewBlob(fileInput.files[0])
+        if (fileInput.files.length > 0 && preview.dataset.state === statusPreview) {
+            previewBlob(fileInput.files[0], preview.dataset.originFormat)
             imageStatus.innerHTML = "upload image"
-            preview.setAttribute('data-state', statusUpload)
+            preview.dataset.state = statusUpload
         }
         errorMessage.innerHTML = ""
         document.querySelectorAll('.tab-contents *>input[type="number"]').forEach(function (element) {
@@ -85,13 +95,16 @@
         )
     }
 
-    function previewBlob(blob) {
+    function previewBlob(blob, ext) {
         let fr = new FileReader()
         fr.readAsDataURL(new File([blob], "name", {lastModified: 0}))
         fr.onload = function () {
             let img = document.createElement('img')
             let info = document.getElementById('size-info')
-            img.setAttribute('src', String(fr.result))
+            let result = fr.result
+            let srcMime = result.slice(result.indexOf(":") + 1, result.indexOf(";"))
+            let replaceMime = result.replace(srcMime, "image/" + ext)
+            img.setAttribute('src', String(replaceMime))
             img.setAttribute('class', 'image')
             img.setAttribute('id', 'preview-image')
             preview.innerHTML = ''
@@ -134,6 +147,34 @@
         })
         reset()
     }
+
+    let fileReset = document.getElementById("file-reset")
+    let download = document.getElementById("download")
+    let mo = new MutationObserver(function () {
+        switch (preview.dataset.state) {
+            case statusNone:
+                fileReset.classList.remove("show")
+                fileReset.classList.add("hide")
+                download.classList.remove("show")
+                download.classList.add("hide")
+                download.href = preview.querySelector("img").src
+                download.download = "imgedit-wasm"
+                break
+            case statusUpload:
+            case statusPreview:
+                fileReset.classList.remove("hide")
+                fileReset.classList.add("show")
+                download.classList.remove("hide")
+                download.classList.add("show")
+                download.href = preview.querySelector("img").src
+                download.download = "imgedit-wasm"
+                break
+        }
+    })
+    let moConfig = {
+        childList: true,
+    }
+    mo.observe(preview, moConfig)
 </script>
 </body>
 </html>

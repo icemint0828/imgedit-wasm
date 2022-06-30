@@ -155,7 +155,8 @@ header > p {
     margin-left: 10px;
 }
 
-.tab-content > input[type=checkbox] + label {
+.tab-content > input[type=checkbox] + label,
+.tab-content > input[type=radio] + label {
     margin-right: 33px;
 }
 
@@ -173,11 +174,13 @@ header > p {
     font-size: 18px;
 }
 
-.tab-content > input[type=checkbox] {
+.tab-content > input[type=checkbox],
+.tab-content > input[type=radio] {
     display: none;
 }
 
-.tab-content > label.checkbox {
+.tab-content > label.checkbox,
+.tab-content > label.radio {
     margin-right: 20px;
     display: inline-block;
     position: relative;
@@ -213,7 +216,38 @@ header > p {
     opacity: 0;
 }
 
-.tab-content > input[type=checkbox]:checked + label.checkbox::after {
+.tab-content > label.radio::before {
+    width: 18px;
+    height: 18px;
+    margin-top: -8px;
+    margin-left: 5px;
+    display: block;
+    position: absolute;
+    top: 50%;
+    right: -21px;
+    border: 2px solid #a89dac;
+    border-radius: 50%;
+    content: '';
+}
+
+.tab-content > label.radio::after {
+    width: 10px;
+    height: 10px;
+    margin-top: -4px;
+    margin-left: 10px;
+    display: inline-block;
+    position: absolute;
+    top: 50%;
+    right: -17px;
+    border: 1px solid steelblue;
+    border-radius: 50%;
+    background-color: steelblue;
+    content: '';
+    opacity: 0;
+}
+
+.tab-content > input[type=checkbox]:checked + label.checkbox::after,
+.tab-content > input[type=radio]:checked + label.radio::after {
     opacity: 1;
 }
 
@@ -231,7 +265,7 @@ header > p {
     background-color: steelblue;
 }
 
-.tab-content > label:not(.checkbox) + button,
+.tab-content > label:not(.checkbox, .radio) + button,
 .tab-content > input + button {
     margin-left: 10px;
 }
@@ -265,28 +299,32 @@ header > p {
     background: rgba(0,0,0,0.5);
 }
 
-.preview-area > .reset {
+.preview-area > .button-area {
     width: 60px;
-    height: 60px;
+    display: flex;
+    flex-direction: column;
     position: absolute;
     top: 5px;
     right: 5px;
     z-index: 2;
 }
 
-.preview-area > .reset > button {
-    width: 100%;
-    height: 100%;
+.preview-area > .button-area > a#file-reset { background: url("./img_reset.png"); }
+.preview-area > .button-area > a#download { background: url("./img_download.png"); }
+
+.preview-area > .button-area > a#file-reset,
+.preview-area > .button-area > a#download {
+    width: 60px;
+    height: 60px;
     margin: 0;
     padding: 0;
-    border: 0;
-    outline: 0;
-    background: url("./img_reset.png");
     background-size: contain;
     opacity: 0.5;
+    cursor: pointer;
 }
 
-.preview-area > .reset > button:hover {
+.preview-area > .button-area > a#file-reset:hover,
+.preview-area > .button-area > a#download:hover {
     opacity: 0.8;
 }
 
