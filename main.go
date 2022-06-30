@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"strconv"
 	"syscall/js"
 	"time"
@@ -37,7 +36,7 @@ func extension(_ js.Value, _ []js.Value) interface{} {
 			break
 		}
 	}
-	fileConvert(extension)
+	fileEdit(nil, extension)
 	return nil
 }
 
@@ -46,7 +45,7 @@ func grayscale(_ js.Value, _ []js.Value) interface{} {
 		bc.Grayscale()
 		return nil
 	}
-	fileEdit(f)
+	fileEdit(f, "")
 	return nil
 }
 
@@ -61,7 +60,7 @@ func reverse(_ js.Value, _ []js.Value) interface{} {
 		}
 		return nil
 	}
-	fileEdit(f)
+	fileEdit(f, "")
 	return nil
 }
 
@@ -94,7 +93,7 @@ func trim(_ js.Value, _ []js.Value) interface{} {
 		bc.Trim(left, top, width, height)
 		return nil
 	}
-	fileEdit(f)
+	fileEdit(f, "")
 	return nil
 }
 
@@ -126,11 +125,11 @@ func resize(_ js.Value, _ []js.Value) interface{} {
 		}
 		return nil
 	}
-	fileEdit(f)
+	fileEdit(f, "")
 	return nil
 }
 
-func fileEdit(f func(bc imgedit.ByteConverter) error) {
+func fileEdit(f func(bc imgedit.ByteConverter) error, dstFormat imgedit.Extension) {
 	message := getElementById("error-message")
 	message.Set("innerHTML", "image editing now")
 	go func() {
@@ -154,11 +153,17 @@ func fileEdit(f func(bc imgedit.ByteConverter) error) {
 				message.Set("innerHTML", "unsupported file")
 				return nil
 			}
-			err = f(bc)
-			if err != nil {
-				time.Sleep(1 * time.Second)
-				message.Set("innerHTML", err.Error())
-				return nil
+			if f != nil {
+				err = f(bc)
+				if err != nil {
+					time.Sleep(1 * time.Second)
+					message.Set("innerHTML", err.Error())
+					return nil
+				}
+			}
+
+			if dstFormat != "" {
+				format = dstFormat
 			}
 
 			dstBuf := &bytes.Buffer{}
@@ -167,46 +172,6 @@ func fileEdit(f func(bc imgedit.ByteConverter) error) {
 			var dstData = window.Get("Uint8Array").New(dstBuf.Len())
 			js.CopyBytesToJS(dstData, dstBuf.Bytes())
 			window.Call("previewBlob", dstData.Get("buffer"), string(format))
-			message.Set("innerHTML", "edit success")
-			status.Set("innerHTML", "preview image")
-			preview.Call("setAttribute", "data-state", "onPreview")
-			return nil
-		}))
-	}()
-	return
-}
-
-func fileConvert(dstFormat imgedit.Extension) {
-	message := getElementById("error-message")
-	message.Set("innerHTML", "image editing now")
-	go func() {
-		status := getElementById("image-status")
-		fileInput := getElementById("file-input")
-		preview := getElementById("preview")
-		item := fileInput.Get("files").Call("item", 0)
-		if item.IsNull() {
-			time.Sleep(1 * time.Second)
-			message.Set("innerHTML", "file not found")
-			return
-		}
-
-		item.Call("arrayBuffer").Call("then", js.FuncOf(func(v js.Value, x []js.Value) any {
-			srcData := window.Get("Uint8Array").New(x[0])
-			src := make([]byte, srcData.Get("length").Int())
-			js.CopyBytesToGo(src, srcData)
-			bc, _, err := imgedit.NewByteConverter(bytes.NewBuffer(src))
-			if err != nil {
-				time.Sleep(1 * time.Second)
-				message.Set("innerHTML", "unsupported file")
-				return nil
-			}
-
-			dstBuf := &bytes.Buffer{}
-			_ = bc.WriteAs(dstBuf, dstFormat)
-
-			var dstData = window.Get("Uint8Array").New(dstBuf.Len())
-			js.CopyBytesToJS(dstData, dstBuf.Bytes())
-			window.Call("previewBlob", dstData.Get("buffer"), string(dstFormat))
 			message.Set("innerHTML", "edit success")
 			status.Set("innerHTML", "preview image")
 			preview.Call("setAttribute", "data-state", "onPreview")

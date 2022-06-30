@@ -22,14 +22,14 @@ window.onload = function () {
             previewFile(this.files[0])
             imageStatus.innerHTML = "upload image"
             errorMessage.innerHTML = ""
-            preview.setAttribute('data-state', statusUpload)
+            preview.dataset.state = statusUpload
             return
         }
         preview.innerHTML = ""
         imageStatus.innerHTML = ""
         errorMessage.innerHTML = ""
         info.innerHTML = ""
-        preview.setAttribute('data-state', statusNone)
+        preview.dataset.state = statusNone
         delete preview.dataset.originFormat
     })
 
@@ -42,7 +42,7 @@ window.onload = function () {
         previewFile(files[0])
         imageStatus.innerHTML = "upload image"
         errorMessage.innerHTML = ""
-        preview.setAttribute('data-state', statusUpload)
+        preview.dataset.state = statusUpload
     }, false)
 
     function previewFile(file) {
