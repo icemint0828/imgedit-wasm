@@ -20,7 +20,7 @@ func main() {
 	window.Set("resize", js.FuncOf(resize))
 	window.Set("trim", js.FuncOf(trim))
 	window.Set("reverse", js.FuncOf(reverse))
-	window.Set("grayscale", js.FuncOf(grayscale))
+	window.Set("filter", js.FuncOf(filter))
 	window.Set("extension", js.FuncOf(extension))
 	<-ch
 }
@@ -40,9 +40,26 @@ func extension(_ js.Value, _ []js.Value) interface{} {
 	return nil
 }
 
-func grayscale(_ js.Value, _ []js.Value) interface{} {
+func filter(_ js.Value, _ []js.Value) interface{} {
 	f := func(bc imgedit.ByteConverter) error {
-		bc.Grayscale()
+		elements := getElementsByName("filter")
+		var val string
+		for i := 0; i < elements.Length(); i++ {
+			element := elements.Index(i)
+			checked := element.Get("checked")
+			if checked.Bool() {
+				val = element.Get("value").String()
+				break
+			}
+		}
+		var model imgedit.FilterModel
+		switch val {
+		case "gray":
+			model = imgedit.GrayModel
+		case "sepia":
+			model = imgedit.SepiaModel
+		}
+		bc.Filter(model)
 		return nil
 	}
 	fileEdit(f, "")

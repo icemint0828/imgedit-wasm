@@ -19,7 +19,7 @@
             <li class="active"><a href="#resize" data-toggle="tab">resize</a></li>
             <li><a href="#trim" data-toggle="tab">trim</a></li>
             <li><a href="#reverse" data-toggle="tab">reverse</a></li>
-            <li><a href="#grayscale" data-toggle="tab">grayscale</a></li>
+            <li><a href="#filter" data-toggle="tab">filter</a></li>
             <li><a href="#extension" data-toggle="tab">extension</a></li>
         </ul>
         <div class="tab-contents">
@@ -40,8 +40,10 @@
                 <input type="checkbox" id="vertical" value="1"><label class="checkbox" for="vertical">vertical:</label>
                 <button class="button" onClick="reverse();">execute</button>
             </div>
-            <div class="tab-content" id="grayscale">
-                <button class="button" onClick="grayscale();">execute</button>
+            <div class="tab-content" id="filter">
+                <input type="radio" name="filter" id="gray" value="gray" checked><label class="radio" for="gray">gray:</label>
+                <input type="radio" name="filter" id="sepia" value="sepia"><label class="radio" for="sepia">sepia:</label>
+                <button class="button" onClick="filter();">execute</button>
             </div>
             <div class="tab-content" id="extension">
                 <input type="radio" name="extension" id="png" value="png" checked><label class="radio" for="png">png:</label>
