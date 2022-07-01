@@ -32,7 +32,7 @@ window.onload = function () {
         errorMessage.innerHTML = ""
         info.innerHTML = ""
         preview.dataset.state = statusNone
-        toggleButtonVisible(false)
+        toggleButtonVisibility(false)
         delete preview.dataset.originFormat
     })
 
@@ -65,13 +65,13 @@ window.onload = function () {
                 let tileInputY = document.getElementById('y-length')
                 tileInputX.setAttribute("max", String(Math.max( 1, Math.trunc(5000 / previewImg.naturalWidth))))
                 tileInputY.setAttribute("max", String(Math.max( 1, Math.trunc(5000 / previewImg.naturalHeight))))
-                toggleButtonVisible(true)
+                toggleButtonVisibility(true)
             }
         }
     }
 
-    function toggleButtonVisible(isShow) {
-        if (isShow) {
+    function toggleButtonVisibility(isVisible) {
+        if (isVisible) {
             fileReset.classList.remove("hide")
             fileReset.classList.add("show")
             download.classList.remove("hide")
