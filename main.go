@@ -22,7 +22,39 @@ func main() {
 	window.Set("reverse", js.FuncOf(reverse))
 	window.Set("filter", js.FuncOf(filter))
 	window.Set("extension", js.FuncOf(extension))
+	window.Set("tile", js.FuncOf(tile))
 	<-ch
+}
+
+func tile(_ js.Value, _ []js.Value) interface{} {
+	f := func(bc imgedit.ByteConverter) error {
+		xLengthInput := getElementById("x-length")
+		yLengthInput := getElementById("y-length")
+
+		xLength, err := strconv.Atoi(xLengthInput.Get("value").String())
+		if err != nil {
+			return nil
+		}
+		yLength, err := strconv.Atoi(yLengthInput.Get("value").String())
+		if err != nil {
+			return nil
+		}
+		xLengthMax, err := strconv.Atoi(xLengthInput.Get("max").String())
+		if err != nil {
+			return nil
+		}
+		yLengthMax, err := strconv.Atoi(yLengthInput.Get("max").String())
+		if err != nil {
+			return nil
+		}
+		if !((1 <= xLength && xLength <= xLengthMax) && (1 <= yLength && yLength <= yLengthMax)) {
+			return errors.New("[ERR]Enter a value between 1 and " + strconv.Itoa(xLengthMax) + " for rows and between 1 and " + strconv.Itoa(yLengthMax) + " for cols.")
+		}
+		bc.Tile(xLength, yLength)
+		return nil
+	}
+	fileEdit(f, "")
+	return nil
 }
 
 func extension(_ js.Value, _ []js.Value) interface{} {

@@ -6,6 +6,8 @@ window.onload = function () {
     let imageStatus = document.getElementById("image-status")
     let errorMessage = document.getElementById("error-message")
     let info = document.getElementById('size-info')
+    let fileReset = document.getElementById("file-reset")
+    let download = document.getElementById("download")
 
     dropZone.addEventListener('dragover', function (e) {
         e.stopPropagation()
@@ -30,6 +32,7 @@ window.onload = function () {
         errorMessage.innerHTML = ""
         info.innerHTML = ""
         preview.dataset.state = statusNone
+        toggleButtonVisible(false)
         delete preview.dataset.originFormat
     })
 
@@ -58,7 +61,26 @@ window.onload = function () {
             preview.appendChild(img).onload = function () {
                 let previewImg = document.getElementById('preview-image')
                 info.innerHTML = "("+ previewImg.naturalWidth + "×" + previewImg.naturalHeight + ")"
+                let tileInputX = document.getElementById('x-length')
+                let tileInputY = document.getElementById('y-length')
+                tileInputX.setAttribute("max", String(Math.max( 1, Math.trunc(5000 / previewImg.naturalWidth))))
+                tileInputY.setAttribute("max", String(Math.max( 1, Math.trunc(5000 / previewImg.naturalHeight))))
+                toggleButtonVisible(true)
             }
+        }
+    }
+
+    function toggleButtonVisible(isShow) {
+        if (isShow) {
+            fileReset.classList.remove("hide")
+            fileReset.classList.add("show")
+            download.classList.remove("hide")
+            download.classList.add("show")
+        } else {
+            fileReset.classList.remove("show")
+            fileReset.classList.add("hide")
+            download.classList.remove("show")
+            download.classList.add("hide")
         }
     }
 }
