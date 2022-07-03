@@ -101,12 +101,7 @@ func filter(_ js.Value, _ []js.Value) interface{} {
 func reverse(_ js.Value, _ []js.Value) interface{} {
 	f := func(bc imgedit.ByteConverter) error {
 		verticalVal := getElementById("vertical").Get("checked")
-
-		if verticalVal.Bool() {
-			bc.ReverseY()
-		} else {
-			bc.ReverseX()
-		}
+		bc.Reverse(!verticalVal.Bool())
 		return nil
 	}
 	fileEdit(f, "")
