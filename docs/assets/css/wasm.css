@@ -37,7 +37,7 @@ a:visited { color: mediumpurple; }
     margin-left: auto;
     padding: 229px 0 80px 0;
     position: relative;
-    background-image: url("./img_logo.png");
+    background-image: url("../image/img_logo.png");
     background-position: top -80px right -130px;
     background-size: 50%;
     background-repeat: no-repeat;
@@ -284,7 +284,7 @@ header > p {
     text-align: center;
     border: solid #5f414b;
     border-width: 0 1px 0 1px;
-    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(200, 200, 200, 0.3)), url("./img_bg.gif"), repeat;
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(200, 200, 200, 0.3)), url("../image/img_bg.gif"), repeat;
 }
 
 .preview-area > .status-bar {
@@ -309,8 +309,8 @@ header > p {
     z-index: 2;
 }
 
-.preview-area > .button-area > a#file-reset { background: url("./img_reset.png"); }
-.preview-area > .button-area > a#download { background: url("./img_download.png"); }
+.preview-area > .button-area > a#file-reset { background: url("../image/img_reset.png"); }
+.preview-area > .button-area > a#download { background: url("../image/img_download.png"); }
 
 .preview-area > .button-area > a#file-reset,
 .preview-area > .button-area > a#download {
