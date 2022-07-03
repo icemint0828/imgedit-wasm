@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"errors"
+	"math"
 	"strconv"
 	"syscall/js"
 	"time"
@@ -10,10 +11,23 @@ import (
 	"github.com/icemint0828/imgedit"
 )
 
+const (
+	MaxPixels = 5000
+	MinPixels = 0
+	MaxRatio  = 10
+	MinRatio  = 0.1
+	StepInt   = 1
+	StepFloat = 0.1
+)
+
 var window = js.Global()
 var document = window.Get("document")
 
 var ErrInvalidParam = errors.New("invalid parameter")
+
+var MaxRowsCount = 100
+var MaxColsCount = 100
+var MinCount = 1
 
 func main() {
 	ch := make(chan interface{})
@@ -23,34 +37,94 @@ func main() {
 	window.Set("filter", js.FuncOf(filter))
 	window.Set("extension", js.FuncOf(extension))
 	window.Set("tile", js.FuncOf(tile))
+	window.Set("setValidValues", js.FuncOf(setValidValues))
+	window.Set("adjustmentTile", js.FuncOf(adjustmentTile))
 	<-ch
+}
+
+func setValidValues(_ js.Value, _ []js.Value) interface{} {
+	// resize
+	setValidPixels("resize-width")
+	setValidPixels("resize-height")
+	setValidRatio("resize-ratio")
+
+	// trim
+	setValidPixels("left")
+	setValidPixels("top")
+	setValidPixels("trim-height")
+	setValidPixels("trim-width")
+
+	// tile
+	setValidCount("cols")
+	setValidCount("rows")
+	return nil
+}
+
+func adjustmentTile(_ js.Value, _ []js.Value) interface{} {
+	previewImg := getElementById("preview-image")
+
+	naturalWidth := previewImg.Get("naturalWidth").Int()
+	naturalHeight := previewImg.Get("naturalHeight").Int()
+	MaxColsCount = int(math.Max(float64(MinCount), math.Trunc(float64(MaxPixels)/float64(naturalWidth))))
+	MaxRowsCount = int(math.Max(float64(MinCount), math.Trunc(float64(MaxPixels)/float64(naturalHeight))))
+
+	setValidCount("cols")
+	setValidCount("rows")
+	return nil
+}
+
+func setValidPixels(id string) {
+	v := getElementById(id)
+	v.Call("setAttribute", "max", MaxPixels)
+	v.Call("setAttribute", "min", MinPixels)
+	v.Call("setAttribute", "step", StepInt)
+}
+
+func setValidRatio(id string) {
+	v := getElementById(id)
+	v.Call("setAttribute", "max", MaxRatio)
+	v.Call("setAttribute", "min", MinRatio)
+	v.Call("setAttribute", "step", StepFloat)
+}
+
+func setValidCount(id string) {
+	v := getElementById(id)
+	var MaxCount int
+	if id == "rows" {
+		MaxCount = MaxRowsCount
+	} else {
+		MaxCount = MaxColsCount
+	}
+	v.Call("setAttribute", "max", MaxCount)
+	v.Call("setAttribute", "min", MinCount)
+	v.Call("setAttribute", "step", StepInt)
 }
 
 func tile(_ js.Value, _ []js.Value) interface{} {
 	f := func(bc imgedit.ByteConverter) error {
-		xLengthInput := getElementById("x-length")
-		yLengthInput := getElementById("y-length")
+		colsInput := getElementById("cols")
+		rowsInput := getElementById("rows")
 
-		xLength, err := strconv.Atoi(xLengthInput.Get("value").String())
+		cols, err := strconv.Atoi(colsInput.Get("value").String())
 		if err != nil {
 			return nil
 		}
-		yLength, err := strconv.Atoi(yLengthInput.Get("value").String())
+		rows, err := strconv.Atoi(rowsInput.Get("value").String())
 		if err != nil {
 			return nil
 		}
-		xLengthMax, err := strconv.Atoi(xLengthInput.Get("max").String())
+		colsMax, err := strconv.Atoi(colsInput.Get("max").String())
 		if err != nil {
 			return nil
 		}
-		yLengthMax, err := strconv.Atoi(yLengthInput.Get("max").String())
+		rowsMax, err := strconv.Atoi(rowsInput.Get("max").String())
 		if err != nil {
 			return nil
 		}
-		if !((1 <= xLength && xLength <= xLengthMax) && (1 <= yLength && yLength <= yLengthMax)) {
-			return errors.New("[ERR]Enter a value between 1 and " + strconv.Itoa(xLengthMax) + " for rows and between 1 and " + strconv.Itoa(yLengthMax) + " for cols.")
+		if !((MinCount <= cols && cols <= MaxColsCount) && (MinCount <= rows && rows <= MaxRowsCount)) {
+			return errors.New("[ERR]Enter a value between 1 and " + strconv.Itoa(colsMax) + " for rows and between 1 and " + strconv.Itoa(rowsMax) + " for cols.")
 		}
-		bc.Tile(xLength, yLength)
+		bc.Tile(cols, rows)
 		return nil
 	}
 	fileEdit(f, "")
@@ -131,7 +205,10 @@ func trim(_ js.Value, _ []js.Value) interface{} {
 		if err != nil {
 			return ErrInvalidParam
 		}
-		if !((0 <= left && left <= 5000) && (0 <= top && top <= 5000) && (0 <= width && width <= 5000) && (0 <= height && height <= 5000)) {
+		if !((MinPixels <= left && left <= MaxPixels) &&
+			(MinPixels <= top && top <= MaxPixels) &&
+			(MinPixels <= width && width <= MaxPixels) &&
+			(MinPixels <= height && height <= MaxPixels)) {
 			return nil
 		}
 		bc.Trim(left, top, width, height)
@@ -149,7 +226,7 @@ func resize(_ js.Value, _ []js.Value) interface{} {
 
 		ratio, err := strconv.ParseFloat(ratioVal.String(), 64)
 		if err == nil {
-			if !(0.01 <= ratio && ratio <= 10) {
+			if !(MinRatio <= ratio && ratio <= MaxRatio) {
 				return nil
 			}
 			bc.ResizeRatio(ratio)
@@ -162,7 +239,7 @@ func resize(_ js.Value, _ []js.Value) interface{} {
 			if err != nil {
 				return nil
 			}
-			if !((0 <= width && width <= 5000) && (0 <= height && height <= 5000)) {
+			if !((MinPixels <= width && width <= MaxPixels) && (MinPixels <= height && height <= MaxPixels)) {
 				return nil
 			}
 			bc.Resize(width, height)

@@ -61,10 +61,8 @@ window.onload = function () {
             preview.appendChild(img).onload = function () {
                 let previewImg = document.getElementById('preview-image')
                 info.innerHTML = "("+ previewImg.naturalWidth + "×" + previewImg.naturalHeight + ")"
-                let tileInputX = document.getElementById('x-length')
-                let tileInputY = document.getElementById('y-length')
-                tileInputX.setAttribute("max", String(Math.max( 1, Math.trunc(5000 / previewImg.naturalWidth))))
-                tileInputY.setAttribute("max", String(Math.max( 1, Math.trunc(5000 / previewImg.naturalHeight))))
+                // defined by main.wasm
+                adjustmentTile()
                 toggleButtonVisibility(true)
             }
         }

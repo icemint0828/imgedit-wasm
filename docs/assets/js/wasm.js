@@ -22,4 +22,6 @@ WebAssembly.instantiateStreaming(fetch(WASM_URL), go.importObject).then(function
     for( let i = 0 ; i < elements.length ; i ++ ) {
         elements[i].disabled = false
     }
+    // defined by main.wasm
+    setValidValues()
 })
