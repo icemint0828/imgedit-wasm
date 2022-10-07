@@ -30,8 +30,8 @@ a:visited { color: mediumpurple; }
 
 /* Wrapper */
 .wrapper {
-    width: 1000px;
-    max-width: 1000px;
+    width: 1200px;
+    max-width: 1200px;
     height: 100%;
     margin-right: auto;
     margin-left: auto;
@@ -166,7 +166,7 @@ header > p {
 }
 
 .tab-content > label > input[type=number] {
-    width: 80px;
+    width: 60px;
     height: 24px;
     padding: 3px;
     border: 1px solid #5f414b;

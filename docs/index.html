@@ -21,6 +21,7 @@
             <li><a href="#reverse" data-toggle="tab">reverse</a></li>
             <li><a href="#filter" data-toggle="tab">filter</a></li>
             <li><a href="#tile" data-toggle="tab">tile</a></li>
+            <li><a href="#add_string" data-toggle="tab">add string</a></li>
             <li><a href="#extension" data-toggle="tab">extension</a></li>
         </ul>
         <div class="tab-contents">
@@ -51,6 +52,18 @@
                 ×
                 <label>rows:<input type="number" id="rows"></label>
                 <button class="button" onClick="tile();">execute</button>
+            </div>
+            <div class="tab-content" id="add_string">
+                <label>text:<input type="text" id="text"></label>
+                <label>size:<input type="number" id="size"></label>
+                <input type="radio" name="color" id="black" value="black" checked><label class="radio" for="black">black:</label>
+                <input type="radio" name="color" id="white" value="white"><label class="radio" for="white">white:</label>
+                <input type="radio" name="color" id="red" value="red"><label class="radio" for="red">red:</label>
+                <input type="radio" name="color" id="blue" value="blue"><label class="radio" for="blue">blue:</label>
+                <input type="radio" name="color" id="green" value="green"><label class="radio" for="green">green:</label>
+                <label>left:<input type="number" id="string_left">px</label>
+                <label>top:<input type="number" id="string_top">px</label>
+                <button class="button" onClick="addString();">execute</button>
             </div>
             <div class="tab-content" id="extension">
                 <input type="radio" name="extension" id="png" value="png" checked><label class="radio" for="png">png:</label>

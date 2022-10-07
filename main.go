@@ -3,6 +3,8 @@ package main
 import (
 	"bytes"
 	"errors"
+	"image"
+	"image/color"
 	"math"
 	"strconv"
 	"syscall/js"
@@ -18,6 +20,8 @@ const (
 	MinRatio  = 0.1
 	StepInt   = 1
 	StepFloat = 0.1
+	MaxSize   = 1000.0
+	MinSize   = 1.0
 )
 
 var window = js.Global()
@@ -37,6 +41,7 @@ func main() {
 	window.Set("filter", js.FuncOf(filter))
 	window.Set("extension", js.FuncOf(extension))
 	window.Set("tile", js.FuncOf(tile))
+	window.Set("addString", js.FuncOf(addString))
 	window.Set("setValidValues", js.FuncOf(setValidValues))
 	window.Set("adjustmentTile", js.FuncOf(adjustmentTile))
 	<-ch
@@ -57,6 +62,11 @@ func setValidValues(_ js.Value, _ []js.Value) interface{} {
 	// tile
 	setValidCount("cols")
 	setValidCount("rows")
+
+	// add string
+	setValidSize("size")
+	setValidPixels("string_left")
+	setValidPixels("string_top")
 	return nil
 }
 
@@ -100,6 +110,58 @@ func setValidCount(id string) {
 	v.Call("setAttribute", "step", StepInt)
 }
 
+func setValidSize(id string) {
+	v := getElementById(id)
+	v.Call("setAttribute", "max", MaxSize)
+	v.Call("setAttribute", "min", MinSize)
+	v.Call("setAttribute", "step", StepFloat)
+}
+
+func addString(_ js.Value, _ []js.Value) interface{} {
+	f := func(bc imgedit.ByteConverter) error {
+		textVal := getElementById("text").Get("value")
+		leftVal := getElementById("string_left").Get("value")
+		topVal := getElementById("string_top").Get("value")
+		sizeVal := getElementById("size").Get("value")
+		if textVal.String() == "" {
+			return errors.New("[ERR]Enter a value for text.")
+		}
+		left, err := strconv.Atoi(leftVal.String())
+		if err != nil {
+			return ErrInvalidParam
+		}
+		top, err := strconv.Atoi(topVal.String())
+		if err != nil {
+			return ErrInvalidParam
+		}
+		if !(MinPixels <= left && left <= MaxPixels && MinPixels <= top && top <= MaxPixels) {
+			return errors.New("[ERR]Enter a value between 1 and " + strconv.Itoa(MaxPixels) + " for top and between 1 and " + strconv.Itoa(MaxPixels) + " for left.")
+		}
+		size, err := strconv.ParseFloat(sizeVal.String(), 64)
+		if err != nil {
+			return ErrInvalidParam
+		}
+		if !(MinSize <= size && size <= MaxSize) {
+			return errors.New("[ERR]Enter a value between 1 and " + strconv.Itoa(MaxSize) + " for size.")
+		}
+		c := getColor(getRadioElement("color"))
+		r, g, b, _ := c.RGBA()
+		var output = &imgedit.Outline{
+			Color: color.RGBA{R: uint8(255 - r), G: uint8(255 - g), B: uint8(255 - b), A: 255},
+			Width: 200,
+		}
+		options := &imgedit.StringOptions{
+			Point:   &image.Point{X: left, Y: top},
+			Font:    &imgedit.Font{Size: size, Color: c},
+			Outline: output,
+		}
+		bc.AddString(textVal.String(), options)
+		return nil
+	}
+	fileEdit(f, "")
+	return nil
+}
+
 func tile(_ js.Value, _ []js.Value) interface{} {
 	f := func(bc imgedit.ByteConverter) error {
 		colsInput := getElementById("cols")
@@ -107,19 +169,19 @@ func tile(_ js.Value, _ []js.Value) interface{} {
 
 		cols, err := strconv.Atoi(colsInput.Get("value").String())
 		if err != nil {
-			return nil
+			return ErrInvalidParam
 		}
 		rows, err := strconv.Atoi(rowsInput.Get("value").String())
 		if err != nil {
-			return nil
+			return ErrInvalidParam
 		}
 		colsMax, err := strconv.Atoi(colsInput.Get("max").String())
 		if err != nil {
-			return nil
+			return ErrInvalidParam
 		}
 		rowsMax, err := strconv.Atoi(rowsInput.Get("max").String())
 		if err != nil {
-			return nil
+			return ErrInvalidParam
 		}
 		if !((MinCount <= cols && cols <= MaxColsCount) && (MinCount <= rows && rows <= MaxRowsCount)) {
 			return errors.New("[ERR]Enter a value between 1 and " + strconv.Itoa(colsMax) + " for rows and between 1 and " + strconv.Itoa(rowsMax) + " for cols.")
@@ -148,16 +210,7 @@ func extension(_ js.Value, _ []js.Value) interface{} {
 
 func filter(_ js.Value, _ []js.Value) interface{} {
 	f := func(bc imgedit.ByteConverter) error {
-		elements := getElementsByName("filter")
-		var val string
-		for i := 0; i < elements.Length(); i++ {
-			element := elements.Index(i)
-			checked := element.Get("checked")
-			if checked.Bool() {
-				val = element.Get("value").String()
-				break
-			}
-		}
+		val := getRadioElement("filter")
 		var model imgedit.FilterModel
 		switch val {
 		case "gray":
@@ -302,10 +355,71 @@ func fileEdit(f func(bc imgedit.ByteConverter) error, dstFormat imgedit.Extensio
 	return
 }
 
+func getRadioElement(elementsName string) string {
+	elements := getElementsByName(elementsName)
+	var val string
+	for i := 0; i < elements.Length(); i++ {
+		element := elements.Index(i)
+		checked := element.Get("checked")
+		if checked.Bool() {
+			val = element.Get("value").String()
+			break
+		}
+	}
+	return val
+}
+
 func getElementById(id string) js.Value {
 	return document.Call("getElementById", id)
 }
 
 func getElementsByName(name string) js.Value {
 	return document.Call("getElementsByName", name)
+}
+
+func getColor(colorString string) color.Color {
+	if colorString == "" {
+		return nil
+	}
+	// specify by color name
+	switch colorString {
+	case "black":
+		return color.Black
+	case "white":
+		return color.White
+	case "red":
+		return color.RGBA{R: 255, G: 0, B: 0, A: 255}
+	case "blue":
+		return color.RGBA{R: 0, G: 0, B: 255, A: 255}
+	case "green":
+		return color.RGBA{R: 0, G: 255, B: 0, A: 255}
+	}
+	// specify by color code(like #FF0000)
+	if string(colorString[0]) != "#" || len(colorString) != 7 {
+		return nil
+	}
+	red, err := getColorBits(colorString[1:3])
+	if err != nil {
+		return nil
+	}
+	green, err := getColorBits(colorString[3:5])
+	if err != nil {
+		return nil
+	}
+	blue, err := getColorBits(colorString[5:7])
+	if err != nil {
+		return nil
+	}
+	return color.RGBA{R: red, G: green, B: blue, A: 255}
+}
+
+func getColorBits(colorString string) (uint8, error) {
+	v, err := strconv.ParseInt(colorString, 16, 64)
+	if err != nil {
+		return 0, err
+	}
+	if v < 0 || 255 < v {
+		return 0, errors.New("color string is out of range")
+	}
+	return uint8(v), nil
 }
