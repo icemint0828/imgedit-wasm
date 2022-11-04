@@ -4,8 +4,7 @@ registerSW();
 
 function registerSW() {
 
-    // Service Worker 対応ブラウザの場合、スコープに基づいてService Worker を登録する
-
+    // For Service Worker-enabled browsers, register a Service Worker based on scope
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', function () {
             navigator.serviceWorker.register('./sw.js', { scope: './' }).then(function (registration) {

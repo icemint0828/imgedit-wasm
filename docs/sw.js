@@ -1,5 +1,4 @@
-// Service Worker のバージョンとキャッシュする App Shell を定義する
-
+// Define Service Worker version and App Shell to cache
 const NAME = 'imgedit-wasm-';
 const VERSION = '001';
 const CACHE_NAME = NAME + VERSION;
@@ -16,8 +15,7 @@ const urlsToCache = [
     './assets/image/img_reset.png',
 ];
 
-// Service Worker へファイルをインストール
-
+// Install files to Service Worker
 self.addEventListener('install', function (event) {
     event.waitUntil(
         caches.open(CACHE_NAME)
@@ -28,9 +26,8 @@ self.addEventListener('install', function (event) {
     );
 });
 
-// リクエストされたファイルが Service Worker にキャッシュされている場合
-// キャッシュからレスポンスを返す
-
+// If the requested file is cached in the Service Worker
+// Return response from cache
 self.addEventListener('fetch', function (event) {
     if (event.request.cache === 'only-if-cached' && event.request.mode !== 'same-origin')
         return;
@@ -45,10 +42,9 @@ self.addEventListener('fetch', function (event) {
     );
 });
 
-// Cache Storage にキャッシュされているサービスワーカーのkeyに変更があった場合
-// 新バージョンをインストール後、旧バージョンのキャッシュを削除する
-// (このファイルでは CACHE_NAME をkeyの値とみなし、変更を検知している)
-
+// If there is a change in the service worker keys cached in Cache Storage,
+// delete the cache of the old version after installing the new version.
+// This file considers CACHE_NAME as the value of key and detects changes.
 self.addEventListener('activate', event => {
     event.waitUntil(
         caches.keys().then(keys => Promise.all(
