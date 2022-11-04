@@ -13,7 +13,8 @@
       "sizes": "512x512"
     }
   ],
-  "start_url": "index.html",
+  "scope": "/imgedit-wasm/",
+  "start_url": "./index.html",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#00C721"

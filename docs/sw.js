@@ -5,15 +5,15 @@ const VERSION = '001';
 const CACHE_NAME = NAME + VERSION;
 const urlsToCache = [
     './index.html',
-    'assets/main.js',
-    'assets/js/drop-zone.js',
-    'assets/js/wasm.js',
-    'assets/js/wasm_exec.js',
-    'assets/css/wasm.css',
-    'assets/image/img_bg.gif',
-    'assets/image/img_download.png',
-    'assets/image/img_logo.png',
-    'assets/image/img_reset.png',
+    './assets/main.js',
+    './assets/js/drop-zone.js',
+    './assets/js/wasm.js',
+    './assets/js/wasm_exec.js',
+    './assets/css/wasm.css',
+    './assets/image/img_bg.gif',
+    './assets/image/img_download.png',
+    './assets/image/img_logo.png',
+    './assets/image/img_reset.png',
 ];
 
 // Service Worker へファイルをインストール
