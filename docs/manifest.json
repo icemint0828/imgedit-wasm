@@ -1,0 +1,20 @@
+{
+  "short_name": "imgedit-wasm app",
+  "name": "imgedit-wasm app",
+  "icons": [
+    {
+      "src": "assets/image/icon-192-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "assets/image/icon-512-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#00C721"
+}
