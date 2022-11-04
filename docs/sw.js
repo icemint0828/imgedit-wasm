@@ -4,7 +4,7 @@ const NAME = 'imgedit-wasm-';
 const VERSION = '001';
 const CACHE_NAME = NAME + VERSION;
 const urlsToCache = [
-    '.index.html',
+    './index.html',
     'assets/main.js',
     'assets/js/drop-zone.js',
     'assets/js/wasm.js',
